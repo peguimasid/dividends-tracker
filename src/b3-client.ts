@@ -33,12 +33,14 @@ const B3_BASE_URL =
 	"https://sistemaswebb3-listados.b3.com.br/listedCompaniesProxy/CompanyCall";
 
 const PAGE_SIZE = 20;
+const LANGUAGE = "pt-br";
+const REQUEST_TIMEOUT_MS = 15_000;
 
 function encodeParams(params: Record<string, string | number>): string {
 	return btoa(JSON.stringify(params));
 }
 
-const api = axios.create({ baseURL: B3_BASE_URL });
+const api = axios.create({ baseURL: B3_BASE_URL, timeout: REQUEST_TIMEOUT_MS });
 
 // ---------------------------------------------------------------------------
 // GetInitialCompanies — resolve ticker to tradingName
@@ -52,7 +54,7 @@ const api = axios.create({ baseURL: B3_BASE_URL });
  */
 export async function getTradingName(issuingCompany: string): Promise<string> {
 	const encoded = encodeParams({
-		language: "pt-br",
+		language: LANGUAGE,
 		pageNumber: 1,
 		pageSize: PAGE_SIZE,
 		company: issuingCompany,
@@ -88,7 +90,7 @@ export async function fetchSupplementCompany(
 ): Promise<B3SupplementCompany> {
 	const encoded = encodeParams({
 		issuingCompany: issuingCompany.toUpperCase(),
-		language: "pt-br",
+		language: LANGUAGE,
 	});
 
 	const endpoint = `/GetListedSupplementCompany/${encoded}`;
@@ -99,6 +101,7 @@ export async function fetchSupplementCompany(
 		throw new Error(`No supplement data found for: ${issuingCompany}`);
 	}
 
+	// The API always returns a single-element array per issuingCompany
 	return data[0];
 }
 
@@ -120,10 +123,11 @@ export async function fetchHistoricalDividends(
 ): Promise<B3HistoricalDividend[]> {
 	const results: B3HistoricalDividend[] = [];
 	let page = 1;
+	let totalPages: number | null = null;
 
-	while (true) {
+	while (totalPages === null || page <= totalPages) {
 		const encoded = encodeParams({
-			language: "pt-br",
+			language: LANGUAGE,
 			pageNumber: page,
 			pageSize: PAGE_SIZE,
 			tradingName,
@@ -135,6 +139,7 @@ export async function fetchHistoricalDividends(
 
 		if (data.results.length === 0) break;
 
+		totalPages = data.page.totalPages;
 		results.push(...data.results);
 		page++;
 	}

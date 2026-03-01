@@ -44,7 +44,7 @@ export interface B3HistoricalDividend {
   dateApproval: string;
   valueCash: string;
   ratio: string;
-  corporateAction: string;
+  corporateAction: "DIVIDENDO" | "JRS CAP PROPRIO" | "RENDIMENTO";
   lastDatePriorEx: string;
   dateClosingPricePriorExDate: string;
   closingPricePriorExDate: string;
@@ -108,7 +108,7 @@ export interface B3SupplementCompany {
   quotedPerSharSince: string;
   commonSharesForm: string;
   preferredSharesForm: string;
-  hasCommom: string;
+  hasCommom: string; // Note: typo is from the B3 API itself ("Commom" instead of "Common")
   hasPreferred: string;
   roundLot: string;
   tradingName: string;
