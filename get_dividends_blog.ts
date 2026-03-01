@@ -130,7 +130,7 @@ async function proventos(ticker: string): Promise<B3CashDividend[]> {
 
 // Main
 async function main(): Promise<void> {
-  const dividends = await proventos("petr");
+  const dividends = await proventos("bbas");
   console.log(dividends);
 }
 
