@@ -21,32 +21,24 @@
  * A shared axios session is used to reuse cookies and avoid Cloudflare rate-limits.
  */
 
-import axios, { type AxiosInstance } from "axios";
+import axios from "axios";
 import type {
-  B3CompanyResponse,
-  B3HistoricalDividend,
-  B3HistoricalDividendResponse,
-  B3SupplementCompany,
+	B3CompanyResponse,
+	B3HistoricalDividend,
+	B3HistoricalDividendResponse,
+	B3SupplementCompany,
 } from "./types.js";
 
 const B3_BASE_URL =
-  "https://sistemaswebb3-listados.b3.com.br/listedCompaniesProxy/CompanyCall";
+	"https://sistemaswebb3-listados.b3.com.br/listedCompaniesProxy/CompanyCall";
 
 const PAGE_SIZE = 20;
 
 function encodeParams(params: Record<string, string | number>): string {
-  return btoa(JSON.stringify(params));
+	return btoa(JSON.stringify(params));
 }
 
-function createClient(): AxiosInstance {
-  return axios.create({
-    baseURL: B3_BASE_URL,
-    timeout: 15_000,
-  });
-}
-
-// Shared client instance — reuses cookies across requests to avoid Cloudflare blocks
-const client = createClient();
+const api = axios.create({ baseURL: B3_BASE_URL });
 
 // ---------------------------------------------------------------------------
 // GetInitialCompanies — resolve ticker to tradingName
@@ -59,26 +51,26 @@ const client = createClient();
  * Example: "BBAS" → "BRASIL", "PETR" → "PETROBRAS"
  */
 export async function getTradingName(issuingCompany: string): Promise<string> {
-  const encoded = encodeParams({
-    language: "pt-br",
-    pageNumber: 1,
-    pageSize: PAGE_SIZE,
-    company: issuingCompany,
-  });
+	const encoded = encodeParams({
+		language: "pt-br",
+		pageNumber: 1,
+		pageSize: PAGE_SIZE,
+		company: issuingCompany,
+	});
 
-  const { data } = await client.get<B3CompanyResponse>(
-    `/GetInitialCompanies/${encoded}`
-  );
+	const endpoint = `/GetInitialCompanies/${encoded}`;
 
-  const match = data.results.find(
-    (c) => c.issuingCompany.toUpperCase() === issuingCompany.toUpperCase()
-  );
+	const { data } = await api.get<B3CompanyResponse>(endpoint);
 
-  if (!match) {
-    throw new Error(`Company not found: ${issuingCompany}`);
-  }
+	const match = data.results.find(
+		(c) => c.issuingCompany.toUpperCase() === issuingCompany.toUpperCase(),
+	);
 
-  return match.tradingName.replaceAll("/", "").replaceAll(".", "").trim();
+	if (!match) {
+		throw new Error(`Company not found: ${issuingCompany}`);
+	}
+
+	return match.tradingName.replaceAll("/", "").replaceAll(".", "").trim();
 }
 
 // ---------------------------------------------------------------------------
@@ -92,22 +84,22 @@ export async function getTradingName(issuingCompany: string): Promise<string> {
  * @param issuingCompany - The B3 issuing company code (e.g. "BBAS", "PETR")
  */
 export async function fetchSupplementCompany(
-  issuingCompany: string
+	issuingCompany: string,
 ): Promise<B3SupplementCompany> {
-  const encoded = encodeParams({
-    issuingCompany: issuingCompany.toUpperCase(),
-    language: "pt-br",
-  });
+	const encoded = encodeParams({
+		issuingCompany: issuingCompany.toUpperCase(),
+		language: "pt-br",
+	});
 
-  const { data } = await client.get<B3SupplementCompany[]>(
-    `/GetListedSupplementCompany/${encoded}`
-  );
+	const endpoint = `/GetListedSupplementCompany/${encoded}`;
 
-  if (!data.length) {
-    throw new Error(`No supplement data found for: ${issuingCompany}`);
-  }
+	const { data } = await api.get<B3SupplementCompany[]>(endpoint);
 
-  return data[0];
+	if (!data.length) {
+		throw new Error(`No supplement data found for: ${issuingCompany}`);
+	}
+
+	return data[0];
 }
 
 // ---------------------------------------------------------------------------
@@ -124,28 +116,28 @@ export async function fetchSupplementCompany(
  * @param tradingName - The company's trading name on B3 (e.g. "PETROBRAS")
  */
 export async function fetchHistoricalDividends(
-  tradingName: string
+	tradingName: string,
 ): Promise<B3HistoricalDividend[]> {
-  const results: B3HistoricalDividend[] = [];
-  let page = 1;
+	const results: B3HistoricalDividend[] = [];
+	let page = 1;
 
-  while (true) {
-    const encoded = encodeParams({
-      language: "pt-br",
-      pageNumber: page,
-      pageSize: PAGE_SIZE,
-      tradingName,
-    });
+	while (true) {
+		const encoded = encodeParams({
+			language: "pt-br",
+			pageNumber: page,
+			pageSize: PAGE_SIZE,
+			tradingName,
+		});
 
-    const { data } = await client.get<B3HistoricalDividendResponse>(
-      `/GetListedCashDividends/${encoded}`
-    );
+		const { data } = await api.get<B3HistoricalDividendResponse>(
+			`/GetListedCashDividends/${encoded}`,
+		);
 
-    if (data.results.length === 0) break;
+		if (data.results.length === 0) break;
 
-    results.push(...data.results);
-    page++;
-  }
+		results.push(...data.results);
+		page++;
+	}
 
-  return results;
+	return results;
 }

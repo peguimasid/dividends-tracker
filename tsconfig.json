@@ -1,14 +1,17 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ES2022",
-    "moduleResolution": "bundler",
+    "target": "esnext",
     "strict": true,
-    "esModuleInterop": true,
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "skipLibCheck": true,
+    "esModuleInterop": true,
     "outDir": "dist",
     "rootDir": "src",
     "baseUrl": ".",
+    "noImplicitAny": true,
+    "resolveJsonModule": true,
+    "noEmit": true,
     "paths": {
       "@/*": ["src/*"]
     }

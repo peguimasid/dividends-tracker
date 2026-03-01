@@ -2,7 +2,7 @@
  * Parse a Brazilian decimal string ("0,21630429188") into a number.
  */
 export function parseBrazilianDecimal(value: string): number {
-  return parseFloat(value.replace(",", "."));
+  return Number.parseFloat(value.replace(",", "."));
 }
 
 /**

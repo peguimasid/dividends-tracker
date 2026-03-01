@@ -1,14 +1,5 @@
-import {
-  fetchSupplementCompany,
-  getTradingName,
-  fetchHistoricalDividends,
-} from "./b3-client.js";
-import {
-  parseBrazilianDecimal,
-  extractIssuingCompany,
-  formatBRL,
-} from "./helpers.js";
-import type { B3CashDividend, B3HistoricalDividend } from "./types.js";
+import { fetchHistoricalDividends, fetchSupplementCompany, getTradingName } from "./b3-client.js";
+import { extractIssuingCompany, formatBRL, parseBrazilianDecimal } from "./helpers.js";
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -35,17 +26,14 @@ async function showRecentDividends(): Promise<void> {
   for (const [label, dividends] of Object.entries(grouped)) {
     if (!dividends) continue;
 
-    const total = dividends.reduce(
-      (sum, d) => sum + parseBrazilianDecimal(d.rate),
-      0
-    );
+    const total = dividends.reduce((sum, d) => sum + parseBrazilianDecimal(d.rate), 0);
 
     console.log(`--- ${label} (${dividends.length} events) ---`);
 
     for (const d of dividends) {
       const value = parseBrazilianDecimal(d.rate);
       console.log(
-        `  ${d.approvedOn}  Payment: ${d.paymentDate}  ${formatBRL(value)}  [${d.relatedTo}]`
+        `  ${d.approvedOn}  Payment: ${d.paymentDate}  ${formatBRL(value)}  [${d.relatedTo}]`,
       );
     }
 
@@ -58,9 +46,7 @@ async function showRecentDividends(): Promise<void> {
 // ---------------------------------------------------------------------------
 
 async function showHistoricalDividends(): Promise<void> {
-  console.log(
-    `\n=== Full historical dividends for ${TICKER} (paginated endpoint) ===\n`
-  );
+  console.log(`\n=== Full historical dividends for ${TICKER} (paginated endpoint) ===\n`);
 
   const tradingName = await getTradingName(ISSUING_COMPANY);
   const dividends = await fetchHistoricalDividends(tradingName);
@@ -72,17 +58,14 @@ async function showHistoricalDividends(): Promise<void> {
   for (const [action, records] of Object.entries(grouped)) {
     if (!records) continue;
 
-    const total = records.reduce(
-      (sum, d) => sum + parseBrazilianDecimal(d.valueCash),
-      0
-    );
+    const total = records.reduce((sum, d) => sum + parseBrazilianDecimal(d.valueCash), 0);
 
     console.log(`--- ${action} (${records.length} events) ---`);
 
     for (const d of records.slice(0, 5)) {
       const value = parseBrazilianDecimal(d.valueCash);
       console.log(
-        `  ${d.dateApproval}  Ex: ${d.lastDatePriorEx}  ${formatBRL(value)}  [${d.typeStock}]`
+        `  ${d.dateApproval}  Ex: ${d.lastDatePriorEx}  ${formatBRL(value)}  [${d.typeStock}]`,
       );
     }
 
@@ -103,4 +86,4 @@ async function main(): Promise<void> {
   await showHistoricalDividends();
 }
 
-main();
+await main();
