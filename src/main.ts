@@ -31,7 +31,9 @@ async function getHistoricalDividends() {
 async function main(): Promise<void> {
   const [recent, historical] = await Promise.all([getRecentDividends(), getHistoricalDividends()]);
 
-  console.log(JSON.stringify({ recent, historical }, null, 2));
+  const dividends = { recent, historical };
+
+  console.log(JSON.stringify(dividends, null, 2));
 }
 
 await main();
