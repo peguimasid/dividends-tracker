@@ -1,4 +1,35 @@
 // ---------------------------------------------------------------------------
+// Yahoo Finance API response types
+// ---------------------------------------------------------------------------
+
+/** Core stock metadata returned by the Yahoo Finance v8 chart endpoint. */
+export interface YahooStockMeta {
+  symbol: string;
+  longName: string;
+  shortName: string;
+  currency: string;
+  exchangeName: string;
+  fullExchangeName: string;
+  instrumentType: string;
+  regularMarketPrice: number;
+  regularMarketDayHigh: number;
+  regularMarketDayLow: number;
+  regularMarketVolume: number;
+  regularMarketTime: number;
+  fiftyTwoWeekHigh: number;
+  fiftyTwoWeekLow: number;
+  chartPreviousClose: number;
+  priceHint: number;
+}
+
+export interface YahooChartResponse {
+  chart: {
+    result: Array<{ meta: YahooStockMeta }> | null;
+    error: unknown;
+  };
+}
+
+// ---------------------------------------------------------------------------
 // B3 API response types
 // ---------------------------------------------------------------------------
 
